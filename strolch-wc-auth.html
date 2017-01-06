@@ -1,0 +1,373 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<link rel="import" href="c-icons.html">
+
+<dom-module id="c-auth">
+
+    <template>
+
+        <style>
+
+            :host {
+                display: block;
+                min-height: 100%;
+            }
+
+            .container {
+                width: 100%;
+            }
+
+            .centered {
+                width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: 3rem;
+            }
+
+            paper-card {
+                width: 100%;
+            }
+
+            .card-actions {
+                text-align: end;
+            }
+
+        </style>
+
+        <paper-dialog id="dlg" modal>
+            <h2>{{dlgTitle}}</h2>
+            <p>{{dlgText}}</p>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+        <div class="container">
+
+            <div id="authForm" class="centered">
+                <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_submitForm"></iron-a11y-keys>
+                <paper-card heading="Login">
+                    <div class="card-content">
+                        <p>Please login to Consilium</p>
+                        <paper-input id="username"
+                                     bind-value="{{username}}"
+                                     label="Username"
+                                     required
+                                     autofocus="true"
+                                     auto-validate></paper-input>
+
+                        <paper-input id="password"
+                                     bind-value="{{password}}"
+                                     label="Password"
+                                     required
+                                     type="password"
+                                     auto-validate></paper-input>
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_showResetForm">Reset</paper-button>
+                        <paper-button on-tap="_submitForm">Login</paper-button>
+                    </div>
+                </paper-card>
+            </div>
+
+            <div id="initiateResetForm" class="centered" hidden>
+                <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_initiateReset"></iron-a11y-keys>
+                <paper-card heading="Password Reset">
+                    <div class="card-content">
+                        <p>To reset your password, enter your username</p>
+                        <paper-input id="usernameReset"
+                                     bind-value="{{username}}"
+                                     label="Username"
+                                     required
+                                     autofocus="true"
+                                     auto-validate></paper-input>
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_initiateReset">Reset</paper-button>
+                    </div>
+                </paper-card>
+            </div>
+
+            <div id="resetInitiated" class="centered" hidden>
+                <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_validateChallenge"></iron-a11y-keys>
+                <paper-card heading="Password Reset">
+                    <div class="card-content">
+                        <p>The reset has been initiated for your account. Please check your e-mail inbox as there should
+                           be an e-mail with a reset code. The code in the e-mail will be valid for one hour.</p>
+
+                        <p>Please enter the code here:</p>
+                        <paper-input id="code"
+                                     bind-value="{{code}}"
+                                     label="Code"
+                                     required
+                                     autofocus="true"
+                                     auto-validate></paper-input>
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_validateChallenge">Send</paper-button>
+                    </div>
+                </paper-card>
+            </div>
+
+            <div id="resetForm" class="centered" hidden>
+                <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_doReset"></iron-a11y-keys>
+                <paper-card heading="Password Reset">
+                    <div class="card-content">
+                        <p>Type in a new password and please repeat it</p>
+                        <paper-input id="password1"
+                                     bind-value="{{password1}}"
+                                     label="Password"
+                                     required
+                                     type="password"
+                                     auto-validate></paper-input>
+                        <paper-input id="password2"
+                                     bind-value="{{password2}}"
+                                     label="Repeat"
+                                     required
+                                     type="password"
+                                     auto-validate></paper-input>
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_doReset">Reset</paper-button>
+                    </div>
+                </paper-card>
+            </div>
+
+            <div id="passwordResetDone" class="centered" hidden>
+                <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_toLogin"></iron-a11y-keys>
+                <paper-card heading="Password Reset">
+                    <div class="card-content">
+                        <p>Your password has been reset. Please login by navigating to the login dialog.</p>
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_showLoginForm">Login</paper-button>
+                    </div>
+                </paper-card>
+            </div>
+
+        </div>
+
+        <iron-ajax id="ajaxAuthCheck"
+                   handle-as="json"
+                   method="HEAD"
+                   on-response="sessionValidated"
+                   on-error="sessionInvalid"></iron-ajax>
+        <iron-ajax id="ajaxAuth"
+                   url="../../rest/strolch/authentication"
+                   content-type="application/json"
+                   handle-as="json"
+                   method="POST"
+                   on-response="_ajaxResponse"
+                   on-error="_handleAjaxError"></iron-ajax>
+
+    </template>
+
+    <script>
+
+        Polymer({
+
+            is: 'c-auth',
+
+            properties: {
+                app: {
+                    type: Object
+                },
+                username: {
+                    type: String
+                },
+                password: {
+                    type: String
+                },
+                password1: {
+                    type: String
+                },
+                password2: {
+                    type: String
+                },
+                code: {
+                    type: String
+                },
+                dlgTitle: {
+                    type: String
+                },
+                dlgText: {
+                    type: String
+                }
+            },
+
+            ready: function () {
+                if (Strolch.hasAuthToken()) {
+                    this.$.ajaxAuthCheck.url = './rest/strolch/authentication/' + localStorage.authToken;
+                    this.$.ajaxAuthCheck.generateRequest();
+                    console.log("Validating session...");
+                }
+            },
+
+            sessionValidated: function () {
+                console.log("Session validated.");
+                Strolch.sessionVerified = true;
+                this.app.sessionValid();
+            },
+            sessionInvalid: function () {
+                console.log("Session invalid.");
+                Strolch.sessionVerified = false;
+                Strolch.clearStorageData();
+            },
+
+            _ajaxResponse: function () {
+                console.log('No response handler defined!');
+            },
+
+            _handleAjaxError: function (data) {
+                if (data.detail.request.response) {
+                    this.dlgText = data.detail.request.response.msg;
+                } else {
+                    this.dlgText = data.detail.error;
+                }
+                this.$.dlg.open();
+            },
+
+            logout: function () {
+                console.log('Logging out...');
+
+                this._ajaxResponse = function (data) {
+                    console.log('Logged out.');
+                    Strolch.clearStorageData();
+                };
+                this.dlgTitle = "Logout failed";
+                this.$.ajaxAuth.url = 'rest/strolch/authentication/' + Strolch.getAuthToken();
+                this.$.ajaxAuth.method = 'DELETE';
+                this.$.ajaxAuth.generateRequest();
+            },
+
+            _submitForm: function () {
+
+                if (!this.$.username.validate() || !this.$.password.validate())
+                    return;
+
+                console.log('Authenticating...');
+                this._ajaxResponse = function (data) {
+                    console.log('Logged in.');
+                    Strolch.setAuthToken(data.detail.response.authToken);
+                    Strolch.setUserConfig(data.detail.response);
+                    location.reload();
+                };
+                this.dlgTitle = "Authentication failed";
+                this.$.ajaxAuth.body = {
+                    'username': this.username,
+                    'password': btoa(this.password)
+                };
+                this.$.ajaxAuth.url = 'rest/strolch/authentication';
+                this.$.ajaxAuth.method = 'POST';
+                this.$.ajaxAuth.generateRequest();
+            },
+
+            _hideAll: function () {
+                this.$.authForm.hidden = true;
+                this.$.initiateResetForm.hidden = true;
+                this.$.resetInitiated.hidden = true;
+                this.$.resetForm.hidden = true;
+                this.$.passwordResetDone.hidden = true;
+            },
+
+            _showResetForm: function () {
+                this._hideAll();
+                this.$.initiateResetForm.hidden = false;
+            },
+
+            _showLoginForm: function () {
+                this._hideAll();
+                this.$.authForm.hidden = false;
+            },
+
+            _initiateReset: function () {
+
+                if (!this.$.usernameReset.validate())
+                    return;
+
+                console.log('Initiating reset...');
+
+                var that = this;
+                this._ajaxResponse = function (data) {
+                    that._hideAll();
+                    that.$.resetInitiated.hidden = false;
+                    that.$.code.focus();
+                };
+                this.dlgTitle = "Reset failed";
+
+                this.$.ajaxAuth.url = 'rest/strolch/authentication/challenge';
+                this.$.ajaxAuth.method = 'POST';
+                this.$.ajaxAuth.body = {
+                    'username': this.username,
+                    'usage': 'set-password'
+                };
+                this.$.ajaxAuth.generateRequest();
+            },
+
+            _validateChallenge: function () {
+
+                if (!this.$.code.validate())
+                    return;
+
+                console.log('Validating challenge...');
+
+                var that = this;
+                this._ajaxResponse = function (data) {
+                    that.authToken = data.detail.response.authToken;
+                    that._hideAll();
+                    that.$.resetForm.hidden = false;
+                    that.$.password1.focus();
+                };
+                this.dlgTitle = "Reset failed";
+
+                this.$.ajaxAuth.url = 'rest/strolch/authentication/challenge';
+                this.$.ajaxAuth.method = 'PUT';
+                this.$.ajaxAuth.body = {
+                    'username': this.username,
+                    'challenge': this.code
+                };
+                this.$.ajaxAuth.generateRequest();
+            },
+
+            _doReset: function () {
+
+                if (!this.$.password1.validate() || !this.$.password2.validate())
+                    return;
+
+                if (this.password1 !== this.password2) {
+                    this.$.password1.invalid = true;
+                    this.$.password2.invalid = true;
+                    this.dlgTitle = "Reset failed";
+                    this.dlgText = 'Passwords do not match.';
+                    this.$.dlg.open();
+                }
+
+                console.log('Doing reset...');
+
+                var that = this;
+                this._ajaxResponse = function (data) {
+                    that._hideAll();
+                    that.$.passwordResetDone.hidden = false;
+                };
+                this.dlgTitle = "Reset failed";
+
+                this.$.ajaxAuth.url = 'rest/strolch/privilege/users/' + this.username + '/password';
+                this.$.ajaxAuth.method = 'PUT';
+                this.$.ajaxAuth.body = {
+                    'password': btoa(this.password1)
+                };
+                this.$.ajaxAuth.generateRequest();
+            }
+        });
+
+    </script>
+
+</dom-module>
