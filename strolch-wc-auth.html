@@ -54,7 +54,7 @@
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_submitForm"></iron-a11y-keys>
                 <paper-card heading="Login">
                     <div class="card-content">
-                        <p>Please login to Consilium</p>
+                        <p>Please login to [[appName]]</p>
                         <paper-input id="username"
                                      bind-value="{{username}}"
                                      label="Username"
@@ -177,6 +177,9 @@
             properties: {
                 app: {
                     type: Object
+                },
+                appName: {
+                    type: String
                 },
                 username: {
                     type: String
