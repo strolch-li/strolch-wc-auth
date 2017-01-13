@@ -40,21 +40,13 @@
 
         </style>
 
-        <paper-dialog id="dlg" modal>
-            <h2>{{dlgTitle}}</h2>
-            <p>{{dlgText}}</p>
-            <div class="buttons">
-                <paper-button dialog-confirm autofocus>Close</paper-button>
-            </div>
-        </paper-dialog>
-
         <div class="container">
 
             <div id="authForm" class="centered">
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_submitForm"></iron-a11y-keys>
                 <paper-card heading="Login">
                     <div class="card-content">
-                        <p>Please login to [[appName]]</p>
+                        <p>Please login to [[appTitle]]</p>
                         <paper-input id="username"
                                      bind-value="{{username}}"
                                      label="Username"
@@ -178,7 +170,7 @@
                 app: {
                     type: Object
                 },
-                appName: {
+                appTitle: {
                     type: String
                 },
                 username: {
@@ -195,16 +187,24 @@
                 },
                 code: {
                     type: String
-                },
-                dlgTitle: {
-                    type: String
-                },
-                dlgText: {
-                    type: String
                 }
             },
 
             ready: function () {
+                // do nothing
+            },
+
+            reload: function () {
+
+                this.username = '';
+                this.password = '';
+                this.password1 = '';
+                this.password2 = '';
+                this.code = '';
+
+                this._hideAll();
+                this.$.authForm.hidden = false;
+
                 if (Strolch.hasAuthToken()) {
                     this.$.ajaxAuthCheck.url = './rest/strolch/authentication/' + localStorage.authToken;
                     this.$.ajaxAuthCheck.generateRequest();
@@ -229,11 +229,11 @@
 
             _handleAjaxError: function (data) {
                 if (data.detail.request.response) {
-                    this.dlgText = data.detail.request.response.msg;
+                    this.app.dlgText = data.detail.request.response.msg;
                 } else {
-                    this.dlgText = data.detail.error;
+                    this.app.dlgText = data.detail.error;
                 }
-                this.$.dlg.open();
+                this.app.$.dlg.open();
             },
 
             logout: function () {
@@ -243,7 +243,7 @@
                     console.log('Logged out.');
                     Strolch.clearStorageData();
                 };
-                this.dlgTitle = "Logout failed";
+                this.app.dlgTitle = "Logout failed";
                 this.$.ajaxAuth.url = 'rest/strolch/authentication/' + Strolch.getAuthToken();
                 this.$.ajaxAuth.method = 'DELETE';
                 this.$.ajaxAuth.generateRequest();
@@ -261,7 +261,7 @@
                     Strolch.setUserConfig(data.detail.response);
                     location.reload();
                 };
-                this.dlgTitle = "Authentication failed";
+                this.app.dlgTitle = "Authentication failed";
                 this.$.ajaxAuth.body = {
                     'username': this.username,
                     'password': btoa(this.password)
@@ -302,7 +302,7 @@
                     that.$.resetInitiated.hidden = false;
                     that.$.code.focus();
                 };
-                this.dlgTitle = "Reset failed";
+                this.app.dlgTitle = "Reset failed";
 
                 this.$.ajaxAuth.url = 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'POST';
@@ -327,7 +327,7 @@
                     that.$.resetForm.hidden = false;
                     that.$.password1.focus();
                 };
-                this.dlgTitle = "Reset failed";
+                this.app.dlgTitle = "Reset failed";
 
                 this.$.ajaxAuth.url = 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'PUT';
@@ -346,9 +346,9 @@
                 if (this.password1 !== this.password2) {
                     this.$.password1.invalid = true;
                     this.$.password2.invalid = true;
-                    this.dlgTitle = "Reset failed";
-                    this.dlgText = 'Passwords do not match.';
-                    this.$.dlg.open();
+                    this.app.dlgTitle = "Reset failed";
+                    this.app.dlgText = 'Passwords do not match.';
+                    this.app.$.dlg.open();
                 }
 
                 console.log('Doing reset...');
@@ -358,7 +358,7 @@
                     that._hideAll();
                     that.$.passwordResetDone.hidden = false;
                 };
-                this.dlgTitle = "Reset failed";
+                this.app.dlgTitle = "Reset failed";
 
                 this.$.ajaxAuth.url = 'rest/strolch/privilege/users/' + this.username + '/password';
                 this.$.ajaxAuth.method = 'PUT';
