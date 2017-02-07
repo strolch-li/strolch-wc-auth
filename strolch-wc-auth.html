@@ -151,7 +151,6 @@
                    on-response="sessionValidated"
                    on-error="sessionInvalid"></iron-ajax>
         <iron-ajax id="ajaxAuth"
-                   url="../../rest/strolch/authentication"
                    content-type="application/json"
                    handle-as="json"
                    method="POST"
@@ -169,6 +168,12 @@
             properties: {
                 app: {
                     type: Object
+                },
+                basePath: {
+                    type: String,
+                    value: function () {
+                        return './';
+                    }
                 },
                 appTitle: {
                     type: String
@@ -206,7 +211,7 @@
                 this.$.authForm.hidden = false;
 
                 if (Strolch.hasAuthToken()) {
-                    this.$.ajaxAuthCheck.url = './rest/strolch/authentication/' + localStorage.authToken;
+                    this.$.ajaxAuthCheck.url = this.basePath + 'rest/strolch/authentication/' + localStorage.authToken;
                     this.$.ajaxAuthCheck.generateRequest();
                     console.log("Validating session...");
                 }
@@ -244,7 +249,7 @@
                     Strolch.clearStorageData();
                 };
                 this.app.dlgTitle = "Logout failed";
-                this.$.ajaxAuth.url = 'rest/strolch/authentication/' + Strolch.getAuthToken();
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getAuthToken();
                 this.$.ajaxAuth.method = 'DELETE';
                 this.$.ajaxAuth.generateRequest();
             },
@@ -266,7 +271,7 @@
                     'username': this.username,
                     'password': btoa(this.password)
                 };
-                this.$.ajaxAuth.url = 'rest/strolch/authentication';
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
                 this.$.ajaxAuth.generateRequest();
             },
@@ -304,7 +309,7 @@
                 };
                 this.app.dlgTitle = "Reset failed";
 
-                this.$.ajaxAuth.url = 'rest/strolch/authentication/challenge';
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'POST';
                 this.$.ajaxAuth.body = {
                     'username': this.username,
@@ -329,7 +334,7 @@
                 };
                 this.app.dlgTitle = "Reset failed";
 
-                this.$.ajaxAuth.url = 'rest/strolch/authentication/challenge';
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
                     'username': this.username,
@@ -360,7 +365,7 @@
                 };
                 this.app.dlgTitle = "Reset failed";
 
-                this.$.ajaxAuth.url = 'rest/strolch/privilege/users/' + this.username + '/password';
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
                     'password': btoa(this.password1)
