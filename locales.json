@@ -1,0 +1,34 @@
+{
+  "en": {
+    "pleaseLogin": "Please login to {appTitle}",
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "reset": "Reset",
+    "passwordReset": "Password Reset",
+    "passwordResetDesc": "To reset your password, enter your username",
+    "passwordResetInitiated": "The reset has been initiated for your account. Please check your e-mail inbox as there should be an e-mail with a reset code. The code in the e-mail will be valid for one hour.",
+    "passwordResetCode": "Please enter the code here:",
+    "passwordResetNew": "Type in a new password and please repeat it",
+    "passwordResetDone": "Your password has been reset. Please login by navigating to the login dialog.",
+    "code": "Code",
+    "repeat": "Repeat",
+    "send": "Send"
+  },
+  "de": {
+    "pleaseLogin": "Melden Sie sich bei {appTitle} an",
+    "username": "Nutzername",
+    "password": "Passwort",
+    "login": "Anmelden",
+    "reset": "Zurücksetzen",
+    "passwordReset": "Passwort zurücksetzen",
+    "passwordResetDesc": "Geben Sie Ihren Nutzernamen ein, um ihr Passwort zurückzusetzen",
+    "passwordResetInitiated": "Der Passwort-Reset wurde eingeleitet. Bitte überprüfen Sie ihren E-Mail Eingang, dieser sollte nun eine E-Mail mit dem Bestätigungs-Code enthalten. Dieser ist für eine Stunde gültig.",
+    "passwordResetCode": "Bitte geben Sie den Code hier ein:",
+    "passwordResetNew": "Geben Sie ein neues Passwort ein und wiederholen Sie es",
+    "passwordResetDone": "Ihr Passwort wurde zurückgesetzt. Bitte loggen Sie sich im Login-Dialog ein.",
+    "code": "Code",
+    "repeat": "Wiederholen",
+    "send": "Absenden"
+  }
+}

@@ -7,6 +7,7 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/strolch-localize-behavior/strolch-localize-behavior.html">
 
 <dom-module id="strolch-wc-auth">
 
@@ -44,101 +45,99 @@
 
             <div id="authForm" class="centered">
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_submitForm"></iron-a11y-keys>
-                <paper-card heading="Login">
+                <paper-card heading="{{localize('login')}}">
                     <div class="card-content">
-                        <p>Please login to [[appTitle]]</p>
+                        <p>{{localize('pleaseLogin', 'appTitle', appTitle)}}</p>
                         <paper-input id="username"
                                      bind-value="{{username}}"
-                                     label="Username"
+                                     label="{{localize('username')}}"
                                      required
                                      autofocus="true"
                                      auto-validate></paper-input>
 
                         <paper-input id="password"
                                      bind-value="{{password}}"
-                                     label="Password"
+                                     label="{{localize('password')}}"
                                      required
                                      type="password"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_showResetForm">Reset</paper-button>
-                        <paper-button on-tap="_submitForm">Login</paper-button>
+                        <paper-button on-tap="_showResetForm">{{localize('reset')}}</paper-button>
+                        <paper-button on-tap="_submitForm">{{localize('login')}}</paper-button>
                     </div>
                 </paper-card>
             </div>
 
             <div id="initiateResetForm" class="centered" hidden>
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_initiateReset"></iron-a11y-keys>
-                <paper-card heading="Password Reset">
+                <paper-card heading="{{localize('passwordReset')}}">
                     <div class="card-content">
-                        <p>To reset your password, enter your username</p>
+                        <p>{{localize('passwordResetDesc')}}</p>
                         <paper-input id="usernameReset"
                                      bind-value="{{username}}"
-                                     label="Username"
+                                     label="{{localize('username')}}"
                                      required
                                      autofocus="true"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_initiateReset">Reset</paper-button>
+                        <paper-button on-tap="_initiateReset">{{localize('reset')}}</paper-button>
                     </div>
                 </paper-card>
             </div>
 
             <div id="resetInitiated" class="centered" hidden>
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_validateChallenge"></iron-a11y-keys>
-                <paper-card heading="Password Reset">
+                <paper-card heading="{{localize('passwordReset')}}">
                     <div class="card-content">
-                        <p>The reset has been initiated for your account. Please check your e-mail inbox as there should
-                           be an e-mail with a reset code. The code in the e-mail will be valid for one hour.</p>
-
-                        <p>Please enter the code here:</p>
+                        <p>{{localize('passwordResetInitiated')}}</p>
+                        <p>{{localize('passwordResetCode')}}</p>
                         <paper-input id="code"
                                      bind-value="{{code}}"
-                                     label="Code"
+                                     label="{{localize('code')}}"
                                      required
                                      autofocus="true"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_validateChallenge">Send</paper-button>
+                        <paper-button on-tap="_validateChallenge">{{localize('send')}}</paper-button>
                     </div>
                 </paper-card>
             </div>
 
             <div id="resetForm" class="centered" hidden>
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_doReset"></iron-a11y-keys>
-                <paper-card heading="Password Reset">
+                <paper-card heading="{{localize('passwordReset')}}">
                     <div class="card-content">
-                        <p>Type in a new password and please repeat it</p>
+                        <p>{{localize('passwordResetNew')}}</p>
                         <paper-input id="password1"
                                      bind-value="{{password1}}"
-                                     label="Password"
+                                     label="{{localize('password')}}"
                                      required
                                      type="password"
                                      auto-validate></paper-input>
                         <paper-input id="password2"
                                      bind-value="{{password2}}"
-                                     label="Repeat"
+                                     label="{{localize('repeat')}}"
                                      required
                                      type="password"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_doReset">Reset</paper-button>
+                        <paper-button on-tap="_doReset">{{localize('reset')}}</paper-button>
                     </div>
                 </paper-card>
             </div>
 
             <div id="passwordResetDone" class="centered" hidden>
                 <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_toLogin"></iron-a11y-keys>
-                <paper-card heading="Password Reset">
+                <paper-card heading="{{localize('passwordReset')}}">
                     <div class="card-content">
-                        <p>Your password has been reset. Please login by navigating to the login dialog.</p>
+                        <p>{{localize('passwordResetDone')}}</p>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_showLoginForm">Login</paper-button>
+                        <paper-button on-tap="_showLoginForm">{{localize('login')}}</paper-button>
                     </div>
                 </paper-card>
             </div>
@@ -164,6 +163,10 @@
         Polymer({
 
             is: 'strolch-wc-auth',
+
+            behaviors: [
+                StrolchLocalizeBehavior
+            ],
 
             properties: {
                 app: {
@@ -197,6 +200,14 @@
 
             ready: function () {
                 // do nothing
+            },
+
+            attached: function () {
+                // this component has its own locales resources to load
+                this.loadResources(this.resolveUrl("./locales.json"));
+
+                // default the language to english, if there is none given by the app
+                if(!this.language) this.language = "en";
             },
 
             reload: function () {
