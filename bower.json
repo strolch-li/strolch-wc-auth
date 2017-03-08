@@ -1,7 +1,7 @@
 {
   "name": "strolch-wc-auth",
   "description": "Strolch WebComponent Auth",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "authors": "Robert von Burg",
   "keywords": [
     "strolch",
