@@ -18,6 +18,8 @@
             :host {
                 display: block;
                 min-height: 100%;
+
+                --input-line-height: 24px;
             }
 
             .container {
@@ -36,7 +38,14 @@
             }
 
             .card-actions {
-                text-align: end;
+                text-align: right;
+            }
+
+            paper-input {
+                --paper-input-container-input: {
+                    height: var(--input-line-height);
+                    line-height: var(--input-line-height);
+                };
             }
 
         </style>
