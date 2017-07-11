@@ -69,6 +69,7 @@
                                      label="{{localize('password')}}"
                                      required
                                      type="password"
+                                     on-focus="onFocus"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
@@ -125,12 +126,14 @@
                                      label="{{localize('password')}}"
                                      required
                                      type="password"
+                                     on-focus="onFocus"
                                      auto-validate></paper-input>
                         <paper-input id="password2"
                                      bind-value="{{password2}}"
                                      label="{{localize('repeat')}}"
                                      required
                                      type="password"
+                                     on-focus="onFocus"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
@@ -152,6 +155,14 @@
             </div>
 
         </div>
+
+        <paper-dialog id="dlg" modal on-iron-overlay-closed="onCloseDlg">
+            <h2>[[dlgTitle]]</h2>
+            <p>[[dlgText]]</p>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>Close</paper-button>
+            </div>
+        </paper-dialog>
 
         <iron-ajax id="ajaxAuthCheck"
                    handle-as="json"
@@ -178,9 +189,6 @@
             ],
 
             properties: {
-                app: {
-                    type: Object
-                },
                 basePath: {
                     type: String,
                     value: function () {
@@ -205,8 +213,8 @@
                 code: {
                     type: String
                 },
-                dlgTitle : {
-                    type:String
+                dlgTitle: {
+                    type: String
                 }
             },
 
@@ -214,12 +222,20 @@
                 // do nothing
             },
 
+            onFocus: function (evt) {
+                evt.target.$.input.select();
+            },
+
+            onCloseDlg: function (evt) {
+                this.$.username.inputElement.select();
+            },
+
             attached: function () {
                 // this component has its own locales resources to load
                 this.loadResources(this.resolveUrl("./locales.json"));
 
                 // default the language to english, if there is none given by the app
-                if(!this.language) this.language = "en";
+                if (!this.language) this.language = "en";
             },
 
             reload: function () {
@@ -243,7 +259,9 @@
             sessionValidated: function () {
                 console.log("Session validated.");
                 Strolch.sessionVerified = true;
-                this.app.sessionValid();
+                this.fire('strolch-session-valid', {
+                    sessionVerified: true
+                });
             },
             sessionInvalid: function () {
                 console.log("Session invalid.");
@@ -263,7 +281,7 @@
                     dlgText = data.detail.error;
                 }
 
-                this.app.showError(this.dlgTitle, dlgText);
+                this.showError(this.dlgTitle, dlgText);
             },
 
             logout: function () {
@@ -378,7 +396,7 @@
                     this.$.password2.invalid = true;
                     var dlgTitle = "Reset failed";
                     var dlgText = 'Passwords do not match.';
-                    this.app.showError(dlgTitle, dlgText);
+                    this.showError(dlgTitle, dlgText);
                 }
 
                 console.log('Doing reset...');
@@ -396,6 +414,13 @@
                     'password': btoa(this.password1)
                 };
                 this.$.ajaxAuth.generateRequest();
+            },
+
+            showError: function (title, text) {
+                this.dlgTitle = title;
+                this.dlgText = text;
+                console.log('ERROR: ' + this.dlgTitle + ': ' + this.dlgText);
+                this.$.dlg.open();
             }
         });
 
