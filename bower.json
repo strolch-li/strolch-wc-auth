@@ -17,8 +17,8 @@
   "homepage": "https://github.com/4treesCH/strolch-wc-auth",
   "ignore": [],
   "dependencies": {
-    "strolchjs": "4treesCH/strolchjs#^0.1.4",
-    "strolch-wc-localize-behavior": "4treesCH/strolch-wc-localize-behavior#^1.0.2",
+    "strolchjs": "4treesCH/strolchjs#^0.2.0",
+    "strolch-wc-localize-behavior": "4treesCH/strolch-wc-localize-behavior#^1.1.0",
     "paper-material": "PolymerElements/paper-material#^1.0.6",
     "paper-card": "PolymerElements/paper-card#^1.1.2",
     "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",

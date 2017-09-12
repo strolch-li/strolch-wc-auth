@@ -13,7 +13,12 @@
     "passwordResetDone": "Your password has been reset. Please login by navigating to the login dialog.",
     "code": "Code",
     "repeat": "Repeat",
-    "send": "Send"
+    "send": "Send",
+    "close" : "Close",
+    "logoutFailed" : "Logout failed",
+    "authenticationFailed" : "Authentication failed",
+    "resetFailed" : "Reset failed",
+    "passwordsDontMatch" : "Passwords don't match"
   },
   "de": {
     "pleaseLogin": "Melden Sie sich bei {appTitle} an",
@@ -29,6 +34,11 @@
     "passwordResetDone": "Ihr Passwort wurde zurückgesetzt. Bitte loggen Sie sich im Login-Dialog ein.",
     "code": "Code",
     "repeat": "Wiederholen",
-    "send": "Absenden"
+    "send": "Absenden",
+    "close" : "Schliessen",
+    "logoutFailed" : "Ausloggen fehlgeschlagen",
+    "authenticationFailed" : "Authentifizierung fehlgeschlagen",
+    "resetFailed" : "Zurücksetzung fehlgeschlagen",
+    "passwordsDontMatch" : "Passwörter sind nicht gleich"
   }
 }

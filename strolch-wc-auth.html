@@ -160,7 +160,7 @@
             <h2>[[dlgTitle]]</h2>
             <p>[[dlgText]]</p>
             <div class="buttons">
-                <paper-button dialog-confirm autofocus>Close</paper-button>
+                <paper-button dialog-confirm autofocus>[[localize('close')]]</paper-button>
             </div>
         </paper-dialog>
 
@@ -195,6 +195,11 @@
                         return './';
                     }
                 },
+                localesPath: {
+                    type: String,
+                    value: './locales.json'
+                },
+
                 appTitle: {
                     type: String
                 },
@@ -228,14 +233,6 @@
 
             onCloseDlg: function (evt) {
                 this.$.username.inputElement.select();
-            },
-
-            attached: function () {
-                // this component has its own locales resources to load
-                this.loadResources(this.resolveUrl("./locales.json"));
-
-                // default the language to english, if there is none given by the app
-                if (!this.language) this.language = "en";
             },
 
             reload: function () {
@@ -291,7 +288,7 @@
                     console.log('Logged out.');
                     Strolch.clearStorageData();
                 };
-                this.dlgTitle = "Logout failed";
+                this.dlgTitle = this.localize('logoutFailed');
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getAuthToken();
                 this.$.ajaxAuth.method = 'DELETE';
                 this.$.ajaxAuth.generateRequest();
@@ -299,8 +296,7 @@
 
             _submitForm: function () {
 
-                if (!this.$.username.validate() || !this.$.password.validate())
-                    return;
+                if (!this.$.username.validate() || !this.$.password.validate()) return;
 
                 console.log('Authenticating...');
                 this._ajaxResponse = function (data) {
@@ -309,7 +305,7 @@
                     Strolch.setUserConfig(data.detail.response);
                     location.reload();
                 };
-                this.dlgTitle = "Authentication failed";
+                this.dlgTitle = this.localize('authenticationFailed');
                 this.$.ajaxAuth.body = {
                     'username': this.username,
                     'password': btoa(this.password)
@@ -339,8 +335,7 @@
 
             _initiateReset: function () {
 
-                if (!this.$.usernameReset.validate())
-                    return;
+                if (!this.$.usernameReset.validate()) return;
 
                 console.log('Initiating reset...');
 
@@ -350,7 +345,7 @@
                     that.$.resetInitiated.hidden = false;
                     that.$.code.focus();
                 };
-                this.dlgTitle = "Reset failed";
+                this.dlgTitle = this.localize('resetFailed');
 
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'POST';
@@ -363,8 +358,7 @@
 
             _validateChallenge: function () {
 
-                if (!this.$.code.validate())
-                    return;
+                if (!this.$.code.validate()) return;
 
                 console.log('Validating challenge...');
 
@@ -375,7 +369,7 @@
                     that.$.resetForm.hidden = false;
                     that.$.password1.focus();
                 };
-                this.dlgTitle = "Reset failed";
+                this.dlgTitle = this.localize('resetFailed');
 
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'PUT';
@@ -388,14 +382,13 @@
 
             _doReset: function () {
 
-                if (!this.$.password1.validate() || !this.$.password2.validate())
-                    return;
+                if (!this.$.password1.validate() || !this.$.password2.validate()) return;
 
                 if (this.password1 !== this.password2) {
                     this.$.password1.invalid = true;
                     this.$.password2.invalid = true;
-                    var dlgTitle = "Reset failed";
-                    var dlgText = 'Passwords do not match.';
+                    var dlgTitle = this.localize('resetFailed');
+                    var dlgText = this.localize('passwordsDontMatch');
                     this.showError(dlgTitle, dlgText);
                 }
 
@@ -406,7 +399,7 @@
                     that._hideAll();
                     that.$.passwordResetDone.hidden = false;
                 };
-                this.dlgTitle = "Reset failed";
+                this.dlgTitle = this.localize('resetFailed');
 
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
                 this.$.ajaxAuth.method = 'PUT';
