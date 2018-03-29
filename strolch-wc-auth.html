@@ -57,15 +57,15 @@
                 <paper-card heading="{{localize('login')}}">
                     <div class="card-content">
                         <p>{{localize('pleaseLogin', 'appTitle', appTitle)}}</p>
-                        <paper-input id="username"
-                                     bind-value="{{username}}"
+                        <paper-input id="usernameInput"
+                                     value="{{username}}"
                                      label="{{localize('username')}}"
                                      required
                                      autofocus="true"
                                      auto-validate></paper-input>
 
-                        <paper-input id="password"
-                                     bind-value="{{password}}"
+                        <paper-input id="passwordInput"
+                                     value="{{password}}"
                                      label="{{localize('password')}}"
                                      required
                                      type="password"
@@ -84,14 +84,15 @@
                 <paper-card heading="{{localize('passwordReset')}}">
                     <div class="card-content">
                         <p>{{localize('passwordResetDesc')}}</p>
-                        <paper-input id="usernameReset"
-                                     bind-value="{{username}}"
+                        <paper-input id="usernameResetInput"
+                                     value="{{username}}"
                                      label="{{localize('username')}}"
                                      required
                                      autofocus="true"
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
+                        <paper-button on-tap="_cancelReset">{{localize('cancel')}}</paper-button>
                         <paper-button on-tap="_initiateReset">{{localize('reset')}}</paper-button>
                     </div>
                 </paper-card>
@@ -103,7 +104,7 @@
                     <div class="card-content">
                         <p>{{localize('passwordResetInitiated')}}</p>
                         <p>{{localize('passwordResetCode')}}</p>
-                        <paper-input id="code"
+                        <paper-input id="codeInput"
                                      bind-value="{{code}}"
                                      label="{{localize('code')}}"
                                      required
@@ -121,14 +122,14 @@
                 <paper-card heading="{{localize('passwordReset')}}">
                     <div class="card-content">
                         <p>{{localize('passwordResetNew')}}</p>
-                        <paper-input id="password1"
+                        <paper-input id="password1Input"
                                      bind-value="{{password1}}"
                                      label="{{localize('password')}}"
                                      required
                                      type="password"
                                      on-focus="onFocus"
                                      auto-validate></paper-input>
-                        <paper-input id="password2"
+                        <paper-input id="password2Input"
                                      bind-value="{{password2}}"
                                      label="{{localize('repeat')}}"
                                      required
@@ -232,7 +233,7 @@
             },
 
             onCloseDlg: function (evt) {
-                this.$.username.inputElement.select();
+                this.$.usernameInput.inputElement.select();
             },
 
             reload: function () {
@@ -296,7 +297,7 @@
 
             _submitForm: function () {
 
-                if (!this.$.username.validate() || !this.$.password.validate()) return;
+                if (!this.$.usernameInput.validate() || !this.$.passwordInput.validate()) return;
 
                 console.log('Authenticating...');
                 this._ajaxResponse = function (data) {
@@ -333,9 +334,14 @@
                 this.$.authForm.hidden = false;
             },
 
+            _cancelReset : function() {
+                this._hideAll();
+                this.$.authForm.hidden = false;
+            },
+
             _initiateReset: function () {
 
-                if (!this.$.usernameReset.validate()) return;
+                if (!this.$.usernameResetInput.validate()) return;
 
                 console.log('Initiating reset...');
 
@@ -343,7 +349,7 @@
                 this._ajaxResponse = function (data) {
                     that._hideAll();
                     that.$.resetInitiated.hidden = false;
-                    that.$.code.focus();
+                    that.$.codeInput.focus();
                 };
                 this.dlgTitle = this.localize('resetFailed');
 
@@ -358,7 +364,7 @@
 
             _validateChallenge: function () {
 
-                if (!this.$.code.validate()) return;
+                if (!this.$.codeInput.validate()) return;
 
                 console.log('Validating challenge...');
 
@@ -367,7 +373,7 @@
                     that.authToken = data.detail.response.authToken;
                     that._hideAll();
                     that.$.resetForm.hidden = false;
-                    that.$.password1.focus();
+                    that.$.password1Input.focus();
                 };
                 this.dlgTitle = this.localize('resetFailed');
 
@@ -382,11 +388,11 @@
 
             _doReset: function () {
 
-                if (!this.$.password1.validate() || !this.$.password2.validate()) return;
+                if (!this.$.password1Input.validate() || !this.$.password2Input.validate()) return;
 
                 if (this.password1 !== this.password2) {
-                    this.$.password1.invalid = true;
-                    this.$.password2.invalid = true;
+                    this.$.password1Input.invalid = true;
+                    this.$.password2Input.invalid = true;
                     var dlgTitle = this.localize('resetFailed');
                     var dlgText = this.localize('passwordsDontMatch');
                     this.showError(dlgTitle, dlgText);
