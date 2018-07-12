@@ -252,6 +252,11 @@
                     this.$.ajaxAuthCheck.generateRequest();
                     console.log("Validating session...");
                 }
+
+                var that = this;
+                setTimeout(function () {
+                    that.$.username.focus();
+                }, 100);
             },
 
             sessionValidated: function () {
