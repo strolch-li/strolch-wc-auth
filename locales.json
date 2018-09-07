@@ -14,13 +14,15 @@
     "code": "Code",
     "repeat": "Repeat",
     "send": "Send",
-    "close" : "Close",
-    "logoutFailed" : "Logout failed",
-    "authenticationFailed" : "Authentication failed",
-    "resetFailed" : "Reset failed",
-    "passwordsDontMatch" : "Passwords don't match"
+    "close": "Close",
+    "logoutFailed": "Logout failed",
+    "authenticationFailed": "Authentication failed",
+    "resetFailed": "Reset failed",
+    "passwordsDontMatch": "Passwords don't match",
+    "cancel": "Cancel"
   },
   "de": {
+    "cancel": "Abbrechen",
     "pleaseLogin": "Melden Sie sich bei {appTitle} an",
     "username": "Nutzername",
     "password": "Passwort",
@@ -35,10 +37,10 @@
     "code": "Code",
     "repeat": "Wiederholen",
     "send": "Absenden",
-    "close" : "Schliessen",
-    "logoutFailed" : "Ausloggen fehlgeschlagen",
-    "authenticationFailed" : "Authentifizierung fehlgeschlagen",
-    "resetFailed" : "Zurücksetzung fehlgeschlagen",
-    "passwordsDontMatch" : "Passwörter sind nicht gleich"
+    "close": "Schliessen",
+    "logoutFailed": "Ausloggen fehlgeschlagen",
+    "authenticationFailed": "Authentifizierung fehlgeschlagen",
+    "resetFailed": "Zurücksetzung fehlgeschlagen",
+    "passwordsDontMatch": "Passwörter sind nicht gleich"
   }
 }
