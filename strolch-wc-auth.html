@@ -317,8 +317,7 @@
                 this.dlgTitle = this.localize('authenticationFailed');
                 this.$.ajaxAuth.body = {
                     'username': this.username,
-                    'password': btoa(this.password),
-                    'encoding': this.passwordEncoding
+                    'password': btoa(unescape(encodeURIComponent(this.password)))
                 };
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
@@ -419,8 +418,7 @@
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
-                    'password': btoa(this.password1),
-                    'encoding': this.passwordEncoding
+                    'password': btoa(unescape(encodeURIComponent(this.password1)))
                 };
                 this.$.ajaxAuth.generateRequest();
             },
