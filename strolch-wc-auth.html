@@ -200,6 +200,9 @@
                     type: String,
                     value: './locales.json'
                 },
+                passwordEncoding: {
+                    type: String
+                },
 
                 appTitle: {
                     type: String
@@ -314,7 +317,8 @@
                 this.dlgTitle = this.localize('authenticationFailed');
                 this.$.ajaxAuth.body = {
                     'username': this.username,
-                    'password': btoa(this.password)
+                    'password': btoa(this.password),
+                    'encoding': this.passwordEncoding
                 };
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
@@ -339,7 +343,7 @@
                 this.$.authForm.hidden = false;
             },
 
-            _cancelReset : function() {
+            _cancelReset: function () {
                 this._hideAll();
                 this.$.authForm.hidden = false;
             },
@@ -415,7 +419,8 @@
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
-                    'password': btoa(this.password1)
+                    'password': btoa(this.password1),
+                    'encoding': this.passwordEncoding
                 };
                 this.$.ajaxAuth.generateRequest();
             },
