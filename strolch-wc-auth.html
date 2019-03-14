@@ -200,7 +200,9 @@
                     type: String,
                     value: './locales.json'
                 },
-
+                passwordEncoding: {
+                    type: String
+                },
                 appTitle: {
                     type: String
                 },
@@ -313,8 +315,9 @@
                 };
                 this.dlgTitle = this.localize('authenticationFailed');
                 this.$.ajaxAuth.body = {
-                    'username': this.username,
-                    'password': btoa(unescape(encodeURIComponent(this.password)))
+                    username: this.username,
+                    password: btoa(unescape(encodeURIComponent(this.password))),
+                    encoding: this.passwordEncoding
                 };
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
@@ -361,8 +364,8 @@
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'POST';
                 this.$.ajaxAuth.body = {
-                    'username': this.username,
-                    'usage': 'set-password'
+                    username: this.username,
+                    usage: 'set-password'
                 };
                 this.$.ajaxAuth.generateRequest();
             },
@@ -385,8 +388,8 @@
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
-                    'username': this.username,
-                    'challenge': this.code
+                    username: this.username,
+                    challenge: this.code
                 };
                 this.$.ajaxAuth.generateRequest();
             },
@@ -415,7 +418,8 @@
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
-                    'password': btoa(unescape(encodeURIComponent(this.password1)))
+                    password: btoa(unescape(encodeURIComponent(this.password1))),
+                    encoding: this.passwordEncoding
                 };
                 this.$.ajaxAuth.generateRequest();
             },
