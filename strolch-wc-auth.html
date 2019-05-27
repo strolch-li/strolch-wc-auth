@@ -71,6 +71,13 @@
                                      type="password"
                                      on-focus="onFocus"
                                      auto-validate></paper-input>
+
+                        <template is="dom-if" if="[[showVersion]]">
+                            <template is="dom-if" if="[[appVersion]]">
+                                <p>[[appName]] [[appVersion]] @ [[_getEnv(environment)]]</p>
+                            </template>
+                        </template>
+
                     </div>
                     <div class="card-actions">
                         <paper-button on-tap="_showResetForm">{{localize('reset')}}</paper-button>
@@ -176,7 +183,13 @@
                    method="POST"
                    on-response="_ajaxResponse"
                    on-error="_handleAjaxError"></iron-ajax>
-
+        <iron-ajax id="ajaxGetVersion"
+                   url="[[basePath]]rest/strolch/version"
+                   content-type="application/json"
+                   handle-as="json"
+                   method="GET"
+                   on-response="onGetVersionResponse"
+                   on-error="onGetVersionError"></iron-ajax>
     </template>
 
     <script>
@@ -201,6 +214,16 @@
                     value: './locales.json'
                 },
                 appTitle: {
+                    type: String
+                },
+                showVersion: {
+                    type: Boolean,
+                    value: false
+                },
+                appVersion: {
+                    type: String
+                },
+                environment: {
                     type: String
                 },
                 username: {
@@ -236,6 +259,10 @@
             },
 
             reload: function () {
+
+                if (this.showVersion) {
+                    this.$.ajaxGetVersion.generateRequest();
+                }
 
                 this.username = '';
                 this.password = '';
@@ -301,7 +328,14 @@
 
             _submitForm: function () {
 
-                if (!this.$.usernameInput.validate() || !this.$.passwordInput.validate()) return;
+                if (!this.$.usernameInput.validate()) {
+                    this.showError(this.localize('missingInput'), this.localize('usernameEmpty'));
+                    return;
+                }
+                if (!this.$.passwordInput.validate()) {
+                    this.showError(this.localize('missingInput'), this.localize('passwordEmpty'));
+                    return;
+                }
 
                 console.log('Authenticating...');
                 this._ajaxResponse = function (data) {
@@ -417,6 +451,33 @@
                     password: btoa(unescape(encodeURIComponent(this.password1)))
                 };
                 this.$.ajaxAuth.generateRequest();
+            },
+
+            onGetVersionResponse: function (event) {
+                var version = event.detail.response;
+                this.appName = version.agentVersion.agentName;
+                this.appVersion = version.appVersion.artifactVersion;
+                this.environment = version.agentVersion.environment;
+                Strolch.setAppVersion(version);
+            },
+
+            onGetVersionError: function (event) {
+                var readyState = event.detail.request.xhr.readyState;
+                var status = event.detail.request.xhr.status;
+                console.log("Ignoring get version error due to readyState: " + readyState + " / status: " + status);
+            },
+            _getEnv: function (environment) {
+                if (environment.indexOf('prod') >= 0) {
+                    return this.localize('production');
+                } else if (environment.indexOf('test') >= 0) {
+                    return this.localize('testing');
+                } else if (environment.indexOf('stag') >= 0) {
+                    return this.localize('staging');
+                } else if (environment.indexOf('dev') >= 0) {
+                    return this.localize('development');
+                } else {
+                    return environment;
+                }
             },
 
             showError: function (title, text) {
