@@ -459,6 +459,7 @@
                 this.appVersion = version.appVersion.artifactVersion;
                 this.environment = version.agentVersion.environment;
                 Strolch.setAppVersion(version);
+                sessionStorage.setItem("strolchAppVersion", JSON.stringify(version));
             },
 
             onGetVersionError: function (event) {
