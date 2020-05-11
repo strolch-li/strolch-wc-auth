@@ -2,6 +2,7 @@
 
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -71,6 +72,10 @@
                                      type="password"
                                      on-focus="onFocus"
                                      auto-validate></paper-input>
+
+                        <template is="dom-if" if="[[showKeepAlive]]">
+                            <paper-checkbox checked="{{keepAlive}}">[[localize('keepAlive')]]</paper-checkbox>
+                        </template>
 
                         <template is="dom-if" if="[[showVersion]]">
                             <template is="dom-if" if="[[appVersion]]">
@@ -174,7 +179,7 @@
 
         <iron-ajax id="ajaxAuthCheck"
                    handle-as="json"
-                   method="HEAD"
+                   method="GET"
                    on-response="sessionValidated"
                    on-error="sessionInvalid"></iron-ajax>
         <iron-ajax id="ajaxAuth"
@@ -216,6 +221,10 @@
                 appTitle: {
                     type: String
                 },
+                showKeepAlive: {
+                    type: Boolean,
+                    value: false
+                },
                 showVersion: {
                     type: Boolean,
                     value: false
@@ -231,6 +240,10 @@
                 },
                 password: {
                     type: String
+                },
+                keepAlive: {
+                    type: Boolean,
+                    value: false
                 },
                 password1: {
                     type: String
@@ -274,7 +287,7 @@
                 this.$.authForm.hidden = false;
 
                 if (Strolch.hasAuthToken()) {
-                    this.$.ajaxAuthCheck.url = this.basePath + 'rest/strolch/authentication/' + localStorage.authToken;
+                    this.$.ajaxAuthCheck.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getCookie("strolch.authorization");
                     this.$.ajaxAuthCheck.generateRequest();
                     console.log("Validating session...");
                 }
@@ -285,12 +298,75 @@
                 }, 100);
             },
 
-            sessionValidated: function () {
+            sessionValidated: function (data) {
                 console.log("Session validated.");
+                var userConfig = data.detail.response;
+                Strolch.setUserConfig(userConfig);
                 Strolch.sessionVerified = true;
                 this.fire('strolch-session-valid', {
                     sessionVerified: true
                 });
+
+                if (userConfig.keepAlive && userConfig.refreshAllowed) {
+                    this.handleKeepAlive(userConfig);
+                }
+            },
+            handleKeepAlive: function (userConfig) {
+
+                console.log("Checking keep alive and Session TTL...");
+
+                var expiry = new Date(Strolch.getCookie("strolch.authorization.expirationDate"));
+                var now = new Date();
+                var diff = expiry.getTime() - now.getTime();
+                var expiryMin = Math.floor(diff / 1000 / 60);
+
+                var keepAliveMinutes = Number.parseInt(userConfig.keepAliveMinutes);
+                var keepAliveDays = keepAliveMinutes / 60 / 24;
+                var delayMin = 14;
+
+                var that = this;
+
+                if (keepAliveMinutes > 1440) {
+                    // more than a day
+
+                    if (expiryMin < 1440) {
+                        // expires today
+
+                        // refresh now
+                        console.log("Keep alive is " + keepAliveDays + " days and expiring today. Refreshing...");
+                        this.refreshSession();
+
+                    } else {
+                        // check again in delayMin min
+                        console.log("Keep alive is " + keepAliveDays + " days and expiring in the future. Delaying refresh for " + delayMin + "m...");
+                        setTimeout(function () {
+                            that.handleKeepAlive(Strolch.getUserConfig());
+                        }, delayMin * 60 * 1000);
+                    }
+                } else if (keepAliveMinutes < 15) {
+
+                    console.error("The keepAliveMinutes is < 15minutes! Server is badly configured, ignoring!");
+
+                } else {
+                    // less than a day
+
+                    if (expiryMin > 15) {
+                        // more than 15 min
+
+                        // check again in delayMin
+                        console.log("Keep alive is " + keepAliveMinutes + " minutes and expiring in " + expiryMin + "m. Delaying refresh for " + delayMin + "m...");
+                        setTimeout(function () {
+                            that.handleKeepAlive(Strolch.getUserConfig());
+                        }, delayMin * 60 * 1000);
+
+                    } else {
+                        // less than 15 min
+
+                        // refresh now
+                        console.log("Keep alive is " + keepAliveMinutes + " minutes and expiring in " + expiryMin + "m. Refreshing...");
+                        this.refreshSession();
+                    }
+                }
             },
             sessionInvalid: function () {
                 console.log("Session invalid.");
@@ -326,6 +402,31 @@
                 this.$.ajaxAuth.generateRequest();
             },
 
+            refreshSession: function () {
+                console.log("Refreshing session...");
+
+                if (Strolch.isEmptyString(Strolch.getAuthToken())) {
+                    console.log("Can not refresh session as no auth token available!");
+                    return;
+                }
+
+                this._ajaxResponse = function (e) {
+                    console.log('Refreshed session which was about to expire...');
+                    var data = e.detail.response;
+
+                    var cookieExpiry = new Date(data.authorizationExpiration);
+                    Strolch.setCookie("strolch.authorization", data.authToken, cookieExpiry);
+                    Strolch.setCookie("strolch.authorization.expirationDate", data.authorizationExpiration, cookieExpiry);
+
+                    Strolch.setAuthToken(data.authToken);
+                    Strolch.setUserConfig(data);
+                };
+                this.dlgTitle = this.localize('sessionRefereshFailed');
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getAuthToken();
+                this.$.ajaxAuth.method = 'PUT';
+                this.$.ajaxAuth.generateRequest();
+            },
+
             _submitForm: function () {
 
                 if (!this.$.usernameInput.validate()) {
@@ -347,7 +448,8 @@
                 this.dlgTitle = this.localize('authenticationFailed');
                 this.$.ajaxAuth.body = {
                     username: this.username,
-                    password: btoa(unescape(encodeURIComponent(this.password)))
+                    password: btoa(unescape(encodeURIComponent(this.password))),
+                    keepAlive: this.keepAlive
                 };
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';

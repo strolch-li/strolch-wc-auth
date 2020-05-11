@@ -26,9 +26,11 @@
     "production": "Production",
     "testing": "Testing",
     "staging": "Staging",
-    "development": "Development"
+    "development": "Development",
+    "keepAlive": "Stay logged in"
   },
   "de": {
+    "keepAlive": "Eingeloggt bleiben",
     "production": "Produktion",
     "testing": "Testing",
     "staging": "Staging",
