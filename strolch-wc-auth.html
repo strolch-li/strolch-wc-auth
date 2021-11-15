@@ -78,8 +78,11 @@
                         </template>
 
                         <template is="dom-if" if="[[showVersion]]">
-                            <template is="dom-if" if="[[appVersion]]">
+                            <template is="dom-if" if="[[showAppVersion]]">
                                 <p>[[appName]] [[appVersion]] @ [[_getEnv(environment)]]</p>
+                            </template>
+                            <template is="dom-if" if="[[showAppEnvironment]]">
+                                <p>[[appName]] @ [[_getEnv(environment)]]</p>
                             </template>
                         </template>
 
@@ -215,9 +218,7 @@
             properties: {
                 basePath: {
                     type: String,
-                    value: function () {
-                        return './';
-                    }
+                    value: './'
                 },
                 localesPath: {
                     type: String,
@@ -234,11 +235,21 @@
                     type: Boolean,
                     value: false
                 },
+                showAppVersion: {
+                    type: Boolean,
+                    value: false
+                },
+                showAppEnvironment: {
+                    type: Boolean,
+                    value: false
+                },
                 appVersion: {
-                    type: String
+                    type: String,
+                    value: null
                 },
                 environment: {
-                    type: String
+                    type: String,
+                    value: null
                 },
                 username: {
                     type: String
@@ -266,6 +277,13 @@
                     type: Boolean,
                     value: false
                 }
+            },
+
+            computeShowAppVersion: function (appVersion, environment) {
+                return appVersion != null && environment != null;
+            },
+            computeShowAppEnvironment: function (appVersion, environment) {
+                return appVersion == null && environment != null;
             },
 
             ready: function () {
@@ -579,6 +597,8 @@
                 this.appName = version.agentVersion.agentName;
                 this.appVersion = version.appVersion.artifactVersion;
                 this.environment = version.agentVersion.environment;
+                this.showAppVersion = this.computeShowAppVersion(this.appVersion, this.environment)
+                this.showAppEnvironment = this.computeShowAppEnvironment(this.appVersion, this.environment)
                 Strolch.setAppVersion(version);
                 sessionStorage.setItem("strolchAppVersion", JSON.stringify(version));
             },
@@ -589,6 +609,9 @@
                 console.log("Ignoring get version error due to readyState: " + readyState + " / status: " + status);
             },
             _getEnv: function (environment) {
+                console.log("environment=" + environment)
+                if (environment == null)
+                    return "-";
                 if (environment.indexOf('prod') >= 0) {
                     return this.localize('production');
                 } else if (environment.indexOf('test') >= 0) {
