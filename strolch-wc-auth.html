@@ -319,9 +319,9 @@
                     console.log("Validating session...");
                 }
 
-                setTimeout(function () {
+                this.async(function () {
                     this.$.usernameInput.focus();
-                }.bind(this), 100);
+                }, 100);
             },
 
             sessionValidated: function (e) {
@@ -363,9 +363,9 @@
                     } else {
                         // check again in delayMin min
                         console.log("Keep alive is " + keepAliveDays + " days and expiring in the future. Delaying refresh for " + delayMin + "m...");
-                        setTimeout(function () {
+                        this.async(function () {
                             this.handleKeepAlive(Strolch.getUserConfig());
-                        }.bind(this), delayMin * 60 * 1000);
+                        }, delayMin * 60 * 1000);
                     }
                 } else if (keepAliveMinutes < 15) {
 
