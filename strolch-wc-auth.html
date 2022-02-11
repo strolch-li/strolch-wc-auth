@@ -582,6 +582,7 @@
                 this.dlgTitle = this.localize('resetFailed');
 
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
+                this.$.ajaxAuth.headers.authorization = this.authToken;
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
                     password: btoa(unescape(encodeURIComponent(this.password1)))
