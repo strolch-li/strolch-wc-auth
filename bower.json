@@ -1,7 +1,7 @@
 {
   "name": "strolch-wc-auth",
   "description": "Strolch WebComponent Auth",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "authors": ["Robert von Burg"],
   "keywords": [
     "strolch",
@@ -18,7 +18,7 @@
   "ignore": [],
   "dependencies": {
     "strolchjs": "4treesCH/strolchjs#^0.5.3",
-    "strolch-wc-localize-behavior": "strolch-li/strolch-wc-localize-behavior#^1.1.15",
+    "strolch-wc-localize-behavior": "strolch-li/strolch-wc-localize-behavior#^1.1.16",
 
     "polymer": "Polymer/polymer#^1.12.0",
 
