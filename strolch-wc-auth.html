@@ -5,6 +5,8 @@
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
@@ -28,7 +30,7 @@
             }
 
             .centered {
-                width: 350px;
+                width: 400px;
                 margin-left: auto;
                 margin-right: auto;
                 margin-top: 3rem;
@@ -39,7 +41,8 @@
             }
 
             .card-actions {
-                text-align: right;
+                display: flex;
+                justify-content: space-between
             }
 
             paper-input {
@@ -47,6 +50,10 @@
                     height: var(--input-line-height);
                     line-height: var(--input-line-height);
                 };
+            }
+
+            #languageDlg paper-listbox {
+                margin: 0;
             }
 
         </style>
@@ -88,8 +95,24 @@
 
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_showResetForm">[[localize('reset')]]</paper-button>
-                        <paper-button on-tap="_submitForm">[[localize('login')]]</paper-button>
+                        <div>
+                            <paper-icon-button icon="icons:language" on-tap="showLanguages"></paper-icon-button>
+                            <paper-dialog id="languageDlg" no-overlap horizontal-align="left" vertical-align="top"
+                                          class="aligned-dialog">
+                                <paper-listbox class="dropdown-content" attr-for-selected="value"
+                                               selected="{{currentLanguage}}">
+                                    <template is="dom-repeat" items="[[languages]]" as="language">
+                                        <paper-item value="[[language.locale]]" on-tap="languageSelected">
+                                            [[language.name]]
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </paper-dialog>
+                        </div>
+                        <div>
+                            <paper-button on-tap="_showResetForm">[[localize('reset')]]</paper-button>
+                            <paper-button on-tap="_submitForm">[[localize('login')]]</paper-button>
+                        </div>
                     </div>
                 </paper-card>
             </div>
@@ -203,6 +226,13 @@
                    method="GET"
                    on-response="onGetVersionResponse"
                    on-error="onGetVersionError"></iron-ajax>
+        <iron-ajax id="ajaxGetSupportedLanguages"
+                   url="[[basePath]]rest/strolch/languages/supported"
+                   content-type="application/json"
+                   handle-as="json"
+                   method="GET"
+                   on-response="onGetSupportedLanguagesResponse"
+                   on-error="onGetSupportedLanguagesError"></iron-ajax>
     </template>
 
     <script>
@@ -223,6 +253,16 @@
                 localesPath: {
                     type: String,
                     value: './locales.json'
+                },
+                currentLanguage: {
+                    type: String,
+                    value: function () {
+                        return Strolch.getUserLocale();
+                    }
+                },
+                languages: {
+                    type: Array,
+                    value: []
                 },
                 appTitle: {
                     type: String
@@ -285,6 +325,9 @@
             computeShowAppEnvironment: function (appVersion, environment) {
                 return appVersion == null && environment != null;
             },
+            arrayEmpty: function (arr) {
+                return arr == null || arr.length === 0;
+            },
 
             ready: function () {
                 // do nothing
@@ -298,11 +341,29 @@
                 this.$.passwordInput.inputElement.select();
             },
 
+            showLanguages: function (e) {
+                this.debounce('open-lang-dlg', function () {
+                    var dlg = this.$$('#languageDlg');
+                    dlg.positionTarget = e.target;
+                    dlg.open();
+                });
+
+                // do not bubble the tap event to the wrapping element
+                e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
+            },
+            languageSelected: function (e) {
+                var language = e.model.language;
+                console.log(language);
+                Strolch.setUserLocale(language.locale);
+                sessionStorage.setItem("languageOverride", language.locale);
+                window.location.reload();
+            },
+
             reload: function () {
 
-                if (this.showVersion) {
+                if (this.showVersion)
                     this.$.ajaxGetVersion.generateRequest();
-                }
+                this.$.ajaxGetSupportedLanguages.generateRequest();
 
                 this.username = '';
                 this.password = '';
@@ -484,6 +545,11 @@
                     password: btoa(unescape(encodeURIComponent(this.password))),
                     keepAlive: this.keepAlive
                 };
+                var languageOverride = sessionStorage.getItem("languageOverride");
+                if (languageOverride != null && languageOverride.length !== 0) {
+                    this.$.ajaxAuth.body.languageOverride = languageOverride;
+                }
+
                 this.password = "";
                 this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
@@ -591,6 +657,18 @@
                 this.password1 = "";
                 this.password2 = "";
                 this.$.ajaxAuth.generateRequest();
+            },
+
+            onGetSupportedLanguagesResponse: function (e) {
+                if (e.detail.response != null) {
+                    this.languages = e.detail.response;
+                } else {
+                    this.languages = [];
+                }
+            },
+            onGetSupportedLanguagesError: function (e) {
+                this.languages = [];
+                console.log("Failed to get supported languages: " + e.detail.response);
             },
 
             onGetVersionResponse: function (e) {
