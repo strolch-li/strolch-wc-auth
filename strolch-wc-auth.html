@@ -291,6 +291,9 @@
                     type: String,
                     value: null
                 },
+                userId: {
+                    type: String
+                },
                 username: {
                     type: String
                 },
@@ -526,6 +529,7 @@
                 console.log('Authenticating...');
                 this._ajaxResponse = function (e) {
                     if (e.detail.response.usage === "set-password") {
+                        this.userId = e.detail.response.userId;
                         this.authToken = e.detail.response.authToken;
                         this.isPasswordChangeRequested = true;
                         this._hideAll();
@@ -647,7 +651,7 @@
                 };
                 this.dlgTitle = this.localize('resetFailed');
 
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.username + '/password';
+                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.userId + '/password';
                 this.$.ajaxAuth.headers.authorization = this.authToken;
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
