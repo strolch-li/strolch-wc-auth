@@ -614,6 +614,7 @@
                 console.log('Validating challenge...');
 
                 this._ajaxResponse = function (data) {
+                    this.userId = data.detail.response.userId;
                     this.authToken = data.detail.response.authToken;
                     this._hideAll();
                     this.$.resetForm.hidden = false;
