@@ -110,7 +110,9 @@
                             </paper-dialog>
                         </div>
                         <div>
-                            <paper-button on-tap="_showResetForm">[[localize('reset')]]</paper-button>
+                            <template is="dom-if" if="[[showReset]]">
+                                <paper-button on-tap="_showResetForm">[[localize('reset')]]</paper-button>
+                            </template>
                             <paper-button on-tap="_submitForm">[[localize('login')]]</paper-button>
                         </div>
                     </div>
@@ -220,14 +222,21 @@
                    on-response="_ajaxResponse"
                    on-error="_handleAjaxError"></iron-ajax>
         <iron-ajax id="ajaxGetVersion"
-                   url="[[basePath]]rest/strolch/version"
+                   url="[[basePath]]/rest/strolch/version"
                    content-type="application/json"
                    handle-as="json"
                    method="GET"
                    on-response="onGetVersionResponse"
                    on-error="onGetVersionError"></iron-ajax>
+        <iron-ajax id="ajaxGetSupportedOptions"
+                   url="[[basePath]]/rest/strolch/authentication/supportedOptions"
+                   content-type="application/json"
+                   handle-as="json"
+                   method="GET"
+                   on-response="onGetSupportedOptionsResponse"
+                   on-error="onGetSupportedOptionsError"></iron-ajax>
         <iron-ajax id="ajaxGetSupportedLanguages"
-                   url="[[basePath]]rest/strolch/languages/supported"
+                   url="[[basePath]]/rest/strolch/languages/supported"
                    content-type="application/json"
                    handle-as="json"
                    method="GET"
@@ -248,7 +257,7 @@
             properties: {
                 basePath: {
                     type: String,
-                    value: './'
+                    value: '.'
                 },
                 localesPath: {
                     type: String,
@@ -280,6 +289,10 @@
                     value: false
                 },
                 showAppEnvironment: {
+                    type: Boolean,
+                    value: false
+                },
+                showReset: {
                     type: Boolean,
                     value: false
                 },
@@ -363,7 +376,7 @@
             },
 
             reload: function () {
-
+                this.$.ajaxGetSupportedOptions.generateRequest();
                 if (this.showVersion)
                     this.$.ajaxGetVersion.generateRequest();
                 this.$.ajaxGetSupportedLanguages.generateRequest();
@@ -378,7 +391,7 @@
                 this.$.authForm.hidden = false;
 
                 if (Strolch.hasAuthToken()) {
-                    this.$.ajaxAuthCheck.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getCookie("strolch.authorization");
+                    this.$.ajaxAuthCheck.url = this.basePath + '/rest/strolch/authentication/' + Strolch.getCookie("strolch.authorization");
                     this.$.ajaxAuthCheck.generateRequest();
                     console.log("Validating session...");
                 }
@@ -485,7 +498,7 @@
                     Strolch.clearStorageData();
                 };
                 this.dlgTitle = this.localize('logoutFailed');
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getAuthToken();
+                this.$.ajaxAuth.url = this.basePath + '/rest/strolch/authentication/' + Strolch.getAuthToken();
                 this.$.ajaxAuth.method = 'DELETE';
                 this.$.ajaxAuth.generateRequest();
             },
@@ -510,7 +523,7 @@
                     Strolch.setUserConfig(data);
                 };
                 this.dlgTitle = this.localize('sessionRefereshFailed');
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/' + Strolch.getAuthToken();
+                this.$.ajaxAuth.url = this.basePath + '/rest/strolch/authentication/' + Strolch.getAuthToken();
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.generateRequest();
             },
@@ -555,7 +568,7 @@
                 }
 
                 this.password = "";
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication';
+                this.$.ajaxAuth.url = this.basePath + '/rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
                 this.$.ajaxAuth.generateRequest();
             },
@@ -598,7 +611,7 @@
                 };
                 this.dlgTitle = this.localize('resetFailed');
 
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
+                this.$.ajaxAuth.url = this.basePath + '/rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'POST';
                 this.$.ajaxAuth.body = {
                     username: this.username,
@@ -622,7 +635,7 @@
                 };
                 this.dlgTitle = this.localize('resetFailed');
 
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/authentication/challenge';
+                this.$.ajaxAuth.url = this.basePath + '/rest/strolch/authentication/challenge';
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
                     username: this.username,
@@ -652,7 +665,7 @@
                 };
                 this.dlgTitle = this.localize('resetFailed');
 
-                this.$.ajaxAuth.url = this.basePath + 'rest/strolch/privilege/users/' + this.userId + '/password';
+                this.$.ajaxAuth.url = this.basePath + '/rest/strolch/privilege/users/' + this.userId + '/password';
                 this.$.ajaxAuth.headers.authorization = this.authToken;
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
@@ -674,6 +687,17 @@
             onGetSupportedLanguagesError: function (e) {
                 this.languages = [];
                 console.log("Failed to get supported languages: " + e.detail.response);
+            },
+
+            onGetSupportedOptionsResponse: function (e) {
+                if (e.detail.response != null) {
+                    this.showReset = e.detail.response.supportsPasswordReset === true;
+                } else {
+                    this.showReset = false;
+                }
+            },
+            onGetSupportedOptionsError: function (e) {
+                this.showReset = false;
             },
 
             onGetVersionResponse: function (e) {
