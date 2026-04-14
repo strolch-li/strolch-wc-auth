@@ -456,10 +456,9 @@
 
                         // check again in delayMin
                         console.log("Keep alive is " + keepAliveMinutes + " minutes and expiring in " + expiryMin + "m. Delaying refresh for " + delayMin + "m...");
-                        setTimeout(function () {
+                        this.async(function () {
                             this.handleKeepAlive(Strolch.getUserConfig());
-                        }.bind(this), delayMin * 60 * 1000);
-
+                        }, delayMin * 60 * 1000);
                     } else {
                         // less than 15 min
 
