@@ -494,6 +494,7 @@
 
                 this._ajaxResponse = function (e) {
                     console.log('Logged out.');
+                    delete localStorage.strolchAppVersion;
                     Strolch.clearStorageData();
                 };
                 this.dlgTitle = this.localize('logoutFailed');
