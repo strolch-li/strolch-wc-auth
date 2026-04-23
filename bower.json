@@ -1,8 +1,10 @@
 {
   "name": "strolch-wc-auth",
   "description": "Strolch WebComponent Auth",
-  "version": "0.11.1",
-  "authors": ["Robert von Burg"],
+  "version": "0.11.3",
+  "authors": [
+    "Robert von Burg"
+  ],
   "keywords": [
     "strolch",
     "auth"
@@ -18,13 +20,10 @@
   "ignore": [],
   "dependencies": {
     "strolchjs": "4treesCH/strolchjs#^0.5.5",
-    "strolch-wc-localize-behavior": "strolch-li/strolch-wc-localize-behavior#^1.1.17",
-
+    "strolch-wc-localize-behavior": "strolch-li/strolch-wc-localize-behavior#^1.1.19",
     "polymer": "Polymer/polymer#^1.12.0",
-
     "iron-ajax": "PolymerElements/iron-ajax#^1.4.4",
     "iron-a11y-keys": "PolymerElements/iron-a11y-keys#^1.0.9",
-
     "paper-material": "PolymerElements/paper-material#^1.0.7",
     "paper-card": "PolymerElements/paper-card#^1.1.6",
     "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",
