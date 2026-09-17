@@ -5,6 +5,7 @@
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-button/paper-button.html">
@@ -56,6 +57,10 @@
                 margin: 0;
             }
 
+            paper-spinner {
+                margin-bottom: -8px;
+            }
+
         </style>
 
         <div class="container">
@@ -94,28 +99,31 @@
                         </template>
 
                     </div>
-                    <div class="card-actions">
-                        <div>
-                            <paper-icon-button icon="icons:language" on-tap="showLanguages"></paper-icon-button>
-                            <paper-dialog id="languageDlg" no-overlap horizontal-align="left" vertical-align="top"
-                                          class="aligned-dialog">
-                                <paper-listbox class="dropdown-content" attr-for-selected="value"
-                                               selected="{{currentLanguage}}">
-                                    <template is="dom-repeat" items="[[languages]]" as="language">
-                                        <paper-item value="[[language.locale]]" on-tap="languageSelected">
-                                            [[language.name]]
-                                        </paper-item>
-                                    </template>
-                                </paper-listbox>
-                            </paper-dialog>
-                        </div>
-                        <div>
-                            <template is="dom-if" if="[[showReset]]">
-                                <paper-button on-tap="_showResetForm">[[localize('reset')]]</paper-button>
-                            </template>
-                            <paper-button on-tap="_submitForm">[[localize('login')]]</paper-button>
-                        </div>
-                    </div>
+					<div class="card-actions">
+						<div>
+							<paper-icon-button icon="icons:language" on-tap="showLanguages" disabled="[[ajaxRunning]]"></paper-icon-button>
+							<paper-dialog id="languageDlg" no-overlap horizontal-align="left" vertical-align="top"
+										  class="aligned-dialog">
+								<paper-listbox class="dropdown-content" attr-for-selected="value"
+											   selected="{{currentLanguage}}">
+									<template is="dom-repeat" items="[[languages]]" as="language">
+										<paper-item value="[[language.locale]]" on-tap="languageSelected">
+											[[language.name]]
+										</paper-item>
+									</template>
+								</paper-listbox>
+							</paper-dialog>
+							<template is="dom-if" if="[[ajaxRunning]]">
+								<paper-spinner active></paper-spinner>
+							</template>
+						</div>
+						<div>
+							<template is="dom-if" if="[[showReset]]">
+								<paper-button on-tap="_showResetForm" disabled="[[ajaxRunning]]">[[localize('reset')]]</paper-button>
+							</template>
+							<paper-button on-tap="_submitForm" disabled="[[ajaxRunning]]">[[localize('login')]]</paper-button>
+						</div>
+					</div>
                 </paper-card>
             </div>
 
@@ -132,8 +140,15 @@
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_cancelReset">[[localize('cancel')]]</paper-button>
-                        <paper-button on-tap="_initiateReset">[[localize('reset')]]</paper-button>
+                        <div>
+                            <template is="dom-if" if="[[ajaxRunning]]">
+                                <paper-spinner active></paper-spinner>
+                            </template>
+                        </div>
+                        <div>
+                            <paper-button on-tap="_cancelReset" disabled="[[ajaxRunning]]">[[localize('cancel')]]</paper-button>
+                            <paper-button on-tap="_initiateReset" disabled="[[ajaxRunning]]">[[localize('reset')]]</paper-button>
+                        </div>
                     </div>
                 </paper-card>
             </div>
@@ -152,7 +167,14 @@
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_validateChallenge">[[localize('send')]]</paper-button>
+                        <div>
+                            <template is="dom-if" if="[[ajaxRunning]]">
+                                <paper-spinner active></paper-spinner>
+                            </template>
+                        </div>
+                        <div>
+                            <paper-button on-tap="_validateChallenge" disabled="[[ajaxRunning]]">[[localize('send')]]</paper-button>
+                        </div>
                     </div>
                 </paper-card>
             </div>
@@ -183,19 +205,32 @@
                                      auto-validate></paper-input>
                     </div>
                     <div class="card-actions">
-                        <paper-button on-tap="_doReset">[[localize('reset')]]</paper-button>
+                        <div>
+                            <template is="dom-if" if="[[ajaxRunning]]">
+                                <paper-spinner active></paper-spinner>
+                            </template>
+                        </div>
+                        <div>
+                            <paper-button on-tap="_doReset" disabled="[[ajaxRunning]]">[[localize('reset')]]</paper-button>
+                        </div>
                     </div>
                 </paper-card>
             </div>
 
             <div id="passwordResetDone" class="centered" hidden>
-                <iron-a11y-keys id="a11y" keys="enter" on-keys-pressed="_toLogin"></iron-a11y-keys>
                 <paper-card heading="[[localize('passwordReset')]]">
                     <div class="card-content">
                         <p>[[localize('passwordResetDone')]]</p>
                     </div>
                     <div class="card-actions">
-                        <paper-button id="backToLoginBtn" on-tap="_showLoginForm">[[localize('login')]]</paper-button>
+                        <div>
+                            <template is="dom-if" if="[[ajaxRunning]]">
+                                <paper-spinner active></paper-spinner>
+                            </template>
+                        </div>
+                        <div>
+                            <paper-button id="backToLoginBtn" on-tap="_showLoginForm" disabled="[[ajaxRunning]]">[[localize('login')]]</paper-button>
+                        </div>
                     </div>
                 </paper-card>
             </div>
@@ -213,12 +248,14 @@
         <iron-ajax id="ajaxAuthCheck"
                    handle-as="json"
                    method="GET"
+                   loading="{{ajaxRunningAuthCheck}}"
                    on-response="sessionValidated"
                    on-error="sessionInvalid"></iron-ajax>
         <iron-ajax id="ajaxAuth"
                    content-type="application/json"
                    handle-as="json"
                    method="POST"
+                   loading="{{ajaxRunningAuth}}"
                    on-response="_ajaxResponse"
                    on-error="_handleAjaxError"></iron-ajax>
         <iron-ajax id="ajaxGetVersion"
@@ -226,6 +263,7 @@
                    content-type="application/json"
                    handle-as="json"
                    method="GET"
+                   loading="{{ajaxRunningGetVersion}}"
                    on-response="onGetVersionResponse"
                    on-error="onGetVersionError"></iron-ajax>
         <iron-ajax id="ajaxGetSupportedOptions"
@@ -233,6 +271,7 @@
                    content-type="application/json"
                    handle-as="json"
                    method="GET"
+                   loading="{{ajaxRunningGetSupportedOptions}}"
                    on-response="onGetSupportedOptionsResponse"
                    on-error="onGetSupportedOptionsError"></iron-ajax>
         <iron-ajax id="ajaxGetSupportedLanguages"
@@ -240,6 +279,7 @@
                    content-type="application/json"
                    handle-as="json"
                    method="GET"
+                   loading="{{ajaxRunningGetSupportedLanguages}}"
                    on-response="onGetSupportedLanguagesResponse"
                    on-error="onGetSupportedLanguagesError"></iron-ajax>
     </template>
@@ -332,7 +372,35 @@
                 isPasswordChangeRequested: {
                     type: Boolean,
                     value: false
+                },
+                ajaxRunning: {
+                    type: Boolean,
+                    computed: 'computeAjaxRunning(ajaxRunningAuthCheck, ajaxRunningAuth, ajaxRunningGetVersion, ajaxRunningGetSupportedOptions, ajaxRunningGetSupportedLanguages)'
+                },
+                ajaxRunningAuthCheck: {
+                    type: Boolean,
+                    value: false
+                },
+                ajaxRunningAuth: {
+                    type: Boolean,
+                    value: false
+                },
+                ajaxRunningGetVersion: {
+                    type: Boolean,
+                    value: false
+                },
+                ajaxRunningGetSupportedOptions: {
+                    type: Boolean,
+                    value: false
+                },
+                ajaxRunningGetSupportedLanguages: {
+                    type: Boolean,
+                    value: false
                 }
+            },
+
+            computeAjaxRunning: function (ajaxRunningAuthCheck, ajaxRunningAuth, ajaxRunningGetVersion, ajaxRunningGetSupportedOptions, ajaxRunningGetSupportedLanguages) {
+                return ajaxRunningAuthCheck || ajaxRunningAuth || ajaxRunningGetVersion || ajaxRunningGetSupportedOptions || ajaxRunningGetSupportedLanguages;
             },
 
             computeShowAppVersion: function (appVersion, environment) {
@@ -358,6 +426,7 @@
             },
 
             showLanguages: function (e) {
+                if (this.ajaxRunning) return;
                 this.debounce('open-lang-dlg', function () {
                     var dlg = this.$$('#languageDlg');
                     dlg.positionTarget = e.target;
@@ -529,6 +598,7 @@
             },
 
             _submitForm: function () {
+                if (this.ajaxRunning) return;
 
                 if (!this.$.usernameInput.validate()) {
                     this.showError(this.localize('missingInput'), this.localize('usernameEmpty'));
@@ -541,6 +611,7 @@
 
                 console.log('Authenticating...');
                 this._ajaxResponse = function (e) {
+                    this.password = "";
                     if (e.detail.response.usage === "set-password") {
                         this.userId = e.detail.response.userId;
                         this.authToken = e.detail.response.authToken;
@@ -559,7 +630,7 @@
                 this.dlgTitle = this.localize('authenticationFailed');
                 this.$.ajaxAuth.body = {
                     username: this.username,
-                    password: btoa(unescape(encodeURIComponent(this.password))),
+                    password: btoa(this.password),
                     keepAlive: this.keepAlive
                 };
                 var languageOverride = sessionStorage.getItem("languageOverride");
@@ -567,7 +638,6 @@
                     this.$.ajaxAuth.body.languageOverride = languageOverride;
                 }
 
-                this.password = "";
                 this.$.ajaxAuth.url = this.basePath + '/rest/strolch/authentication';
                 this.$.ajaxAuth.method = 'POST';
                 this.$.ajaxAuth.generateRequest();
@@ -582,23 +652,27 @@
             },
 
             _showResetForm: function () {
+                if (this.ajaxRunning) return;
                 this._hideAll();
                 this.$.initiateResetForm.hidden = false;
                 this.$.usernameResetInput.focus();
             },
 
             _showLoginForm: function () {
+                if (this.ajaxRunning) return;
                 this._hideAll();
                 this.$.authForm.hidden = false;
                 this.$.passwordInput.inputElement.select();
             },
 
             _cancelReset: function () {
+                if (this.ajaxRunning) return;
                 this._hideAll();
                 this.$.authForm.hidden = false;
             },
 
             _initiateReset: function () {
+                if (this.ajaxRunning) return;
 
                 if (!this.$.usernameResetInput.validate()) return;
 
@@ -621,6 +695,7 @@
             },
 
             _validateChallenge: function () {
+                if (this.ajaxRunning) return;
 
                 if (!this.$.codeInput.validate()) return;
 
@@ -645,6 +720,7 @@
             },
 
             _doReset: function () {
+                if (this.ajaxRunning) return;
 
                 if (!this.$.password1Input.validate() || !this.$.password2Input.validate()) return;
 
@@ -669,7 +745,7 @@
                 this.$.ajaxAuth.headers.authorization = this.authToken;
                 this.$.ajaxAuth.method = 'PUT';
                 this.$.ajaxAuth.body = {
-                    password: btoa(unescape(encodeURIComponent(this.password1)))
+                    password: btoa(this.password1)
                 };
                 this.password = "";
                 this.password1 = "";
