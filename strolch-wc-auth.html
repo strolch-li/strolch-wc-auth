@@ -99,31 +99,34 @@
                         </template>
 
                     </div>
-					<div class="card-actions">
-						<div>
-							<paper-icon-button icon="icons:language" on-tap="showLanguages" disabled="[[ajaxRunning]]"></paper-icon-button>
-							<paper-dialog id="languageDlg" no-overlap horizontal-align="left" vertical-align="top"
-										  class="aligned-dialog">
-								<paper-listbox class="dropdown-content" attr-for-selected="value"
-											   selected="{{currentLanguage}}">
-									<template is="dom-repeat" items="[[languages]]" as="language">
-										<paper-item value="[[language.locale]]" on-tap="languageSelected">
-											[[language.name]]
-										</paper-item>
-									</template>
-								</paper-listbox>
-							</paper-dialog>
-							<template is="dom-if" if="[[ajaxRunning]]">
-								<paper-spinner active></paper-spinner>
-							</template>
-						</div>
-						<div>
-							<template is="dom-if" if="[[showReset]]">
-								<paper-button on-tap="_showResetForm" disabled="[[ajaxRunning]]">[[localize('reset')]]</paper-button>
-							</template>
-							<paper-button on-tap="_submitForm" disabled="[[ajaxRunning]]">[[localize('login')]]</paper-button>
-						</div>
-					</div>
+                    <div class="card-actions">
+                        <div>
+                            <paper-icon-button icon="icons:language" on-tap="showLanguages"
+                                               disabled="[[ajaxRunning]]"></paper-icon-button>
+                            <paper-dialog id="languageDlg" no-overlap horizontal-align="left" vertical-align="top"
+                                          class="aligned-dialog">
+                                <paper-listbox class="dropdown-content" attr-for-selected="value"
+                                               selected="{{currentLanguage}}">
+                                    <template is="dom-repeat" items="[[languages]]" as="language">
+                                        <paper-item value="[[language.locale]]" on-tap="languageSelected">
+                                            [[language.name]]
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </paper-dialog>
+                            <template is="dom-if" if="[[ajaxRunning]]">
+                                <paper-spinner active></paper-spinner>
+                            </template>
+                        </div>
+                        <div>
+                            <template is="dom-if" if="[[showReset]]">
+                                <paper-button on-tap="_showResetForm" disabled="[[ajaxRunning]]">[[localize('reset')]]
+                                </paper-button>
+                            </template>
+                            <paper-button on-tap="_submitForm" disabled="[[ajaxRunning]]">[[localize('login')]]
+                            </paper-button>
+                        </div>
+                    </div>
                 </paper-card>
             </div>
 
@@ -146,8 +149,10 @@
                             </template>
                         </div>
                         <div>
-                            <paper-button on-tap="_cancelReset" disabled="[[ajaxRunning]]">[[localize('cancel')]]</paper-button>
-                            <paper-button on-tap="_initiateReset" disabled="[[ajaxRunning]]">[[localize('reset')]]</paper-button>
+                            <paper-button on-tap="_cancelReset" disabled="[[ajaxRunning]]">[[localize('cancel')]]
+                            </paper-button>
+                            <paper-button on-tap="_initiateReset" disabled="[[ajaxRunning]]">[[localize('reset')]]
+                            </paper-button>
                         </div>
                     </div>
                 </paper-card>
@@ -173,7 +178,8 @@
                             </template>
                         </div>
                         <div>
-                            <paper-button on-tap="_validateChallenge" disabled="[[ajaxRunning]]">[[localize('send')]]</paper-button>
+                            <paper-button on-tap="_validateChallenge" disabled="[[ajaxRunning]]">[[localize('send')]]
+                            </paper-button>
                         </div>
                     </div>
                 </paper-card>
@@ -211,7 +217,8 @@
                             </template>
                         </div>
                         <div>
-                            <paper-button on-tap="_doReset" disabled="[[ajaxRunning]]">[[localize('reset')]]</paper-button>
+                            <paper-button on-tap="_doReset" disabled="[[ajaxRunning]]">[[localize('reset')]]
+                            </paper-button>
                         </div>
                     </div>
                 </paper-card>
@@ -229,7 +236,9 @@
                             </template>
                         </div>
                         <div>
-                            <paper-button id="backToLoginBtn" on-tap="_showLoginForm" disabled="[[ajaxRunning]]">[[localize('login')]]</paper-button>
+                            <paper-button id="backToLoginBtn" on-tap="_showLoginForm" disabled="[[ajaxRunning]]">
+                                [[localize('login')]]
+                            </paper-button>
                         </div>
                     </div>
                 </paper-card>
@@ -735,6 +744,7 @@
                 console.log('Doing reset...');
 
                 this._ajaxResponse = function (e) {
+                    delete this.$.ajaxAuth.headers.authorization;
                     this._hideAll();
                     this.$.passwordResetDone.hidden = false;
                     this.$.backToLoginBtn.focus();
